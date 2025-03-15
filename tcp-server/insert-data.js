@@ -3,27 +3,24 @@ const Transaction = require("./models/transaction");
 const Log = require("./models/log");
 
 // MongoDB connection
-mongoose.connect("mongodb://localhost:27017/transactionsDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+// const connection = "mongodb://localhost:27017/transactionsDB"
+const connection = "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false"
+mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const insertTransactions = async () => {
   // Sample data to insert
   const sampleData = [
     {
-      data: { amount: 205066, currency: "USD" },
-      alert: "High value transaction",
+      amount: 205066, currency: "USD", alert: "High value transaction",
     },
-    { data: { amount: 20566, currency: "USD" }, alert: null },
+    {  amount: 20566, currency: "USD", alert: null },
     {
-      data: { amount: 50566, currency: "EUR" },
-      alert: "Suspicious activity",
+      amount: 50566, currency: "EUR", alert: "Suspicious activity",
     },
   ];
 
   // Insert data into the database
-  Transaction.insertMany(sampleData.map(d => ({...d, data: JSON.stringify(d.data)})))
+  Transaction.insertMany(sampleData)
     .then(() => {
       console.log("Data inserted successfully");
       mongoose.connection.close();

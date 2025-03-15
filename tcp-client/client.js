@@ -2,6 +2,7 @@
 
 const net = require('net');
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
@@ -13,7 +14,7 @@ app.use(cors());
 const client = new net.Socket();
 
 // List of data types to request
-const dataTypes = ['transactions', 'logs', 'alerts', 'metrics'];
+const dataTypes = ['transactions', 'logs'];
 let currentIndex = 0;
 
 // Store data for each type
@@ -27,7 +28,7 @@ client.connect(1337, 'localhost', () => {
 const requestNextDataType = () => {
   if (currentIndex < dataTypes.length) {
     const currentType = dataTypes[currentIndex];
-    client.write(currentType); // Send the request to the server
+    client.write(JSON.stringify({type: currentType}).trim()); // Send the request to the server
   } else {
     // client.end(); // Close connection after fetching all data
     console.log('All data received:', dataStore);
@@ -37,6 +38,7 @@ const requestNextDataType = () => {
 client.on('data', (data) => {
   try {
     const message = JSON.parse(data.toString());
+    console.log("message:", message)
 
     // Store the data by type
     dataStore[message.type] = message.data;

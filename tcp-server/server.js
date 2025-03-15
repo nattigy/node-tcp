@@ -4,43 +4,64 @@ const Transaction = require("./models/transaction");
 const Log = require("./models/log");
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/transactionsDB', { useNewUrlParser: true, useUnifiedTopology: true });
+// const connection = "mongodb://localhost:27017/transactionsDB"
+const connection = "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false"
+mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Store connected clients
 const clients = [];
+
+const models = {
+  transactions: Transaction,
+  logs: Log
+}
 
 const server = net.createServer((socket) => {
   console.log('Client connected');
   clients.push(socket);
 
-  socket.on('data', (data) => {
+  socket.on('data', async (data) => {
     const request = data.toString().trim();
-    if (request === 'transactions' || request === 'logs') {
-      streamData(socket, request);
+    try {
+      const parsedRequest = JSON.parse(request);
+      console.log("parsedRequest:", parsedRequest)
+      if (parsedRequest.type === 'transactions' || parsedRequest.type === 'logs') {
+        const data = await models[parsedRequest.type].find(parsedRequest.filter || {});
+        socket.write(JSON.stringify({ type: parsedRequest.type, data }));
+      } else {
+        socket.write(JSON.stringify({ error: 'Invalid request type' }));
+      }
+    } catch (err) {
+      console.error('Invalid request format:', err);
+      socket.write(JSON.stringify({ error: 'Invalid request format' }));
     }
   });
 
   socket.on('end', () => {
     const index = clients.indexOf(socket);
     if (index !== -1) clients.splice(index, 1);
+    console.log('Client disconnected');
+  });
+
+  socket.on('error', (err) => {
+    console.error('TCP Server Error:', err);
   });
 });
 
-function streamData(socket, type) {
-  const model = type === 'transactions' ? Transaction : Log;
+// MongoDB Change Stream to detect data changes
+const watchCollections = async (model, type) => {
+  const changeStream = model.watch();
+  changeStream.on('change', (change) => {
+    console.log(`Change detected in ${type}:`, change);
+    clients.forEach((client) => {
+      client.write(JSON.stringify({ type, data: change.fullDocument }));
+    });
+  });
+};
 
-  // Stream data at intervals
-  const interval = setInterval(async () => {
-    const data = await model.find({}).sort({ timestamp: -1 }).limit(100).lean();
-    console.log("data: ", data)
-    const payload = JSON.stringify({ type, data });
-    socket.write(payload);
-  }, 5000); // Fetch data every 5 seconds
+watchCollections(Transaction, 'transactions');
+watchCollections(Log, 'logs');
 
-  socket.on('end', () => clearInterval(interval));
-}
-
-const PORT = 1337;
-server.listen(PORT, () => {
-  console.log(`TCP server listening on port ${PORT}`);
+server.listen(1337, () => {
+  console.log('TCP server listening on port 1337');
 });
