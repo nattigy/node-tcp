@@ -1,18 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 
-interface Log {
-  log: Record<string, unknown>;
-}
-
 const Logs = () => {
-  const [data, setData] = useState<Log[]>([]);
+  const [data, setData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:4000/api/logs");
-        const result: Log[] = await response.json();
+        const result: any[] = await response.json();
         const newLogs = result.filter(
           (newItem) =>
             !data.some(

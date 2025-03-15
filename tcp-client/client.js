@@ -2,7 +2,6 @@
 
 const net = require('net');
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
@@ -30,6 +29,7 @@ const requestNextDataType = () => {
     const currentType = dataTypes[currentIndex];
     client.write(JSON.stringify({type: currentType}).trim()); // Send the request to the server
   } else {
+    currentIndex = 0
     // client.end(); // Close connection after fetching all data
     console.log('All data received:', dataStore);
   }
@@ -37,6 +37,7 @@ const requestNextDataType = () => {
 
 client.on('data', (data) => {
   try {
+    console.log("messagedata:", data.toString())
     const message = JSON.parse(data.toString());
     console.log("message:", message)
 
@@ -47,7 +48,6 @@ client.on('data', (data) => {
     currentIndex++;
     requestNextDataType(); // Request the next data type
   } catch (error) {
-    currentIndex = 0
     console.error('Error parsing data:', error);
   }
 });

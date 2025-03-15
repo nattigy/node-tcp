@@ -10,13 +10,10 @@ mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true }
 const insertTransactions = async () => {
   // Sample data to insert
   const sampleData = [
-    {
-      amount: 205066, currency: "USD", alert: "High value transaction",
-    },
-    {  amount: 20566, currency: "USD", alert: null },
-    {
-      amount: 50566, currency: "EUR", alert: "Suspicious activity",
-    },
+    { amount: 205066, currency: "USD", alert: "High value transaction" },
+    {  amount: 20566, currency: "USD", alert: "N" },
+    { amount: 50566, currency: "EUR", alert: "Suspicious activity" },
+    // { amount: 50566, currency: "EUR", alert: "last" },
   ];
 
   // Insert data into the database
@@ -43,6 +40,7 @@ const insertLogs = async () => {
     },
     { message: "Server restarted 010", level: "WARNING" },
     { message: "Unauthorized access attempt detected 010", level: "ALERT" },
+    // { message: "last", level: "ALERT" },
   ];
 
   try {

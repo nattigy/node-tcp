@@ -23,10 +23,11 @@ const server = net.createServer((socket) => {
   socket.on('data', async (data) => {
     const request = data.toString().trim();
     try {
+      console.log("Request:", request)
       const parsedRequest = JSON.parse(request);
       console.log("parsedRequest:", parsedRequest)
       if (parsedRequest.type === 'transactions' || parsedRequest.type === 'logs') {
-        const data = await models[parsedRequest.type].find(parsedRequest.filter || {});
+        const data = await models[parsedRequest.type].find(parsedRequest.filter || {}).limit(100);
         socket.write(JSON.stringify({ type: parsedRequest.type, data }));
       } else {
         socket.write(JSON.stringify({ error: 'Invalid request type' }));
@@ -54,7 +55,7 @@ const watchCollections = async (model, type) => {
   changeStream.on('change', (change) => {
     console.log(`Change detected in ${type}:`, change);
     clients.forEach((client) => {
-      client.write(JSON.stringify({ type, data: change.fullDocument }));
+      client.write(JSON.stringify({ type, data: Array.isArray(change.fullDocument) ? change.fullDocument : [change.fullDocument] }));
     });
   });
 };
