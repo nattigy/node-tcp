@@ -19,7 +19,7 @@ const RealTimeChart = () => {
   const fetchChartData = async () => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:4000/api/metrics?filter=${filter}`)
+    fetch(`http://localhost:5001/api/metrics?filter=${filter}`)
       .then((response) => {
         if (!response.ok) throw new Error("Network response was not ok");
         return response.json();

@@ -18,7 +18,7 @@ const Logs = () => {
   const fetchLogs = () => {
     setLoading(true);
     setError(null);
-    fetch(`http://localhost:4000/api/logs?filter=${filter}`)
+    fetch(`http://localhost:5001/api/logs?filter=${filter}`)
       .then((response) => {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
