@@ -4,6 +4,14 @@ const Log = require("./models/log");
 const Metric = require("./models/metric");
 const Event = require("./models/event");
 
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+const PORT = 5003;
+
+app.use(cors());
+
 // MongoDB connection
 // const connection = "mongodb://localhost:27017/transactionsDB"
 const connection =
@@ -131,9 +139,33 @@ const insertEvents = async () => {
   }
 };
 
-(async () => {
-  await insertTransactions();
-  await insertLogs();
-  await insertMetrics();
-  await insertEvents();
-})()
+// (async () => {
+//   await insertTransactions();
+//   await insertLogs();
+//   await insertMetrics();
+//   await insertEvents();
+// })()
+
+// API to serve data to React client
+app.get("/api/insertdata/:type", async (req, res) => {
+  const type = req.params.type
+  if(type === "transaction") {
+    await insertTransactions();
+    res.json({message: "transaction data added successfully"});
+  } else if (type === "logs") {
+    await insertLogs();
+    res.json({message: "logs data added successfully"});
+  } else if (type === "metrics") {
+    await insertMetrics();
+    res.json({message: "metrics data added successfully"});
+  } else if (type === "events") {
+    await insertEvents();
+    res.json({message: "events data added successfully"});
+  } else {
+    res.json({message: "no data added"});
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`API server running on http://localhost:${PORT}`);
+});
