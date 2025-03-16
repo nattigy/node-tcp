@@ -5,7 +5,7 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
-const PORT = 4000;
+const PORT = 5001;
 
 app.use(cors());
 
@@ -23,7 +23,7 @@ const dataStore = {
   events: [],
 };
 
-client.connect(1337, "localhost", () => {
+client.connect(5000, "localhost", () => {
   console.log("Connected to TCP server");
   requestNextDataType(); // Start the first request
 });

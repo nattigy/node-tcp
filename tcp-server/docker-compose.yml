@@ -1,0 +1,7 @@
+services:
+  app:
+    image: tcp_server_app
+    build: .
+    # ports:
+    #   - 3000:3000
+    network_mode: "host"

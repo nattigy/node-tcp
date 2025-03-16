@@ -73,6 +73,6 @@ watchCollections(Log, 'logs');
 watchCollections(Metric, 'metrics');
 watchCollections(Event, 'events');
 
-server.listen(1337, () => {
+server.listen(5000, () => {
   console.log('TCP server listening on port 1337');
 });
