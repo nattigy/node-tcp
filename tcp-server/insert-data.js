@@ -1,56 +1,139 @@
 const mongoose = require("mongoose");
 const Transaction = require("./models/transaction");
 const Log = require("./models/log");
+const Metric = require("./models/metric");
+const Event = require("./models/event");
 
 // MongoDB connection
 // const connection = "mongodb://localhost:27017/transactionsDB"
-const connection = "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false"
-mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true });
+const connection =
+  "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false";
+mongoose.connect(connection, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const insertTransactions = async () => {
+  // amount: Number,
+  // status: String, // e.g., 'pending', 'completed', 'failed'
+  // currency: String,
+  // alert: String
   // Sample data to insert
   const sampleData = [
-    { amount: 205066, currency: "USD", alert: "High value transaction" },
-    {  amount: 20566, currency: "USD", alert: "N" },
-    { amount: 50566, currency: "EUR", alert: "Suspicious activity" },
-    // { amount: 50566, currency: "EUR", alert: "last" },
-  ];
-
-  // Insert data into the database
-  Transaction.insertMany(sampleData)
-    .then(() => {
-      console.log("Data inserted successfully");
-      mongoose.connection.close();
-    })
-    .catch((err) => {
-      console.error("Error inserting data:", err);
-      mongoose.connection.close();
-    });
-};
-
-insertTransactions();
-
-const insertLogs = async () => {
-  const logs = [
-    { message: "User login successful 010", level: "INFO" },
-    { message: "Database connection established 010", level: "INFO" },
     {
-      message: "Transaction failed due to insufficient balance 010",
-      level: "ERROR",
+      amount: 205066,
+      status: "pending",
+      currency: "USD",
+      alert: "High value transaction",
     },
-    { message: "Server restarted 010", level: "WARNING" },
-    { message: "Unauthorized access attempt detected 010", level: "ALERT" },
-    // { message: "last", level: "ALERT" },
+    { amount: 20566, status: "completed", currency: "USD", alert: "N" },
+    {
+      amount: 50566,
+      status: "failed",
+      currency: "EUR",
+      alert: "Suspicious activity",
+    },
   ];
 
   try {
-    await Log.insertMany(logs);
+    for(let i = 0; i < sampleData.length; i++){
+      await Transaction.create(sampleData[i])
+      await new Promise((resolve) => setTimeout(() => resolve(), 2000))
+    }
+    // await Transaction.insertMany(sampleData);
+    console.log("Transactions inserted successfully");
+  } catch (error) {
+    console.error("Error inserting Transactions:", error);
+  } finally {
+    // mongoose.connection.close();
+  }
+};
+
+const insertLogs = async () => {
+  // message: String,
+  // level: String, // e.g., 'info', 'warn', 'error'
+  // source: String, // e.g., 'server', 'database', 'client'
+  const sampleData = [
+    { message: "User login successful 010", level: "INFO", source: "server" },
+    {
+      message: "Database connection established 010",
+      level: "INFO",
+      source: "database",
+    },
+    {
+      message: "Transaction failed due to insufficient balance 010",
+      level: "ERROR",
+      source: "client",
+    },
+    { message: "Server restarted 010", level: "WARNING", source: "database" },
+    {
+      message: "Unauthorized access attempt detected 010",
+      level: "ALERT",
+      source: "server",
+    },
+  ];
+
+  try {
+    for(let i = 0; i < sampleData.length; i++){
+      await Log.create(sampleData[i])
+      await new Promise((resolve) => setTimeout(() => resolve(), 2000))
+    }
+    // await Log.insertMany(sampleData);
     console.log("Logs inserted successfully");
   } catch (error) {
     console.error("Error inserting logs:", error);
+  } finally {
+    // mongoose.connection.close();
+  }
+};
+
+const insertMetrics = async () => {
+  // value: Number,
+  // metricType: String, // e.g., 'CPU usage', 'memory usage', 'latency'
+  const sampleData = [
+    { values: [100, 300, 700], metricType: "CPU usage" },
+    { values: [200, 400, 600], metricType: "memory usage" },
+    { values: [500, 800, 650], metricType: "latency" },
+  ];
+
+  try {
+    for(let i = 0; i < sampleData.length; i++){
+      await Metric.create(sampleData[i])
+      await new Promise((resolve) => setTimeout(() => resolve(), 2000))
+    }
+    // await Metric.insertMany(sampleData);
+    console.log("Metrics inserted successfully");
+  } catch (error) {
+    console.error("Error inserting Metrics:", error);
+  } finally {
+    // mongoose.connection.close();
+  }
+};
+
+const insertEvents = async () => {
+  // eventType: String,
+  // details: String,
+  const sampleData = [
+    { eventType: "loggedin", details: "successfully logged in" },
+  ];
+
+  try {
+    for(let i = 0; i < sampleData.length; i++){
+      await Event.create(sampleData[i])
+      await new Promise((resolve) => setTimeout(() => resolve(), 2000))
+    }
+    // await Event.insertMany(sampleData);
+    console.log("Events inserted successfully");
+  } catch (error) {
+    console.error("Error inserting Events:", error);
   } finally {
     mongoose.connection.close();
   }
 };
 
-insertLogs();
+(async () => {
+  await insertTransactions();
+  await insertLogs();
+  await insertMetrics();
+  await insertEvents();
+})()

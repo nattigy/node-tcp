@@ -1,12 +1,8 @@
-import Logs from "./components/Logs";
-import Transactions from "./components/Transactions";
+import MonitoringDashboard from "./components/MonitoringDashboard";
 
 const Home: React.FC = () => {
   return (
-    <div style={{ display: 'flex', gap: '20px' }}>
-      <Transactions />
-      <Logs />
-    </div>
+    <MonitoringDashboard />
   );
 };
 

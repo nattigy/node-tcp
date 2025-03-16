@@ -1,11 +1,15 @@
 const mongoose = require("mongoose");
 
-const transactionSchema = new mongoose.Schema({
-  currency: String,
-  alert: String,
-  amount: Number,
-  timestamp: Date,
-});
-const Transaction = mongoose.model("Transaction", transactionSchema);
+const Transaction = mongoose.model(
+  "Transaction",
+  new mongoose.Schema({
+    id: String,
+    amount: Number,
+    timestamp: String,
+    status: String, // e.g., 'pending', 'completed', 'failed'
+    currency: String,
+    alert: String
+  })
+);
 
 module.exports = Transaction;

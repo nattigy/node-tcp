@@ -2,6 +2,8 @@ const net = require('net');
 const mongoose = require("mongoose");
 const Transaction = require("./models/transaction");
 const Log = require("./models/log");
+const Metric = require("./models/metric");
+const Event = require("./models/event");
 
 // Connect to MongoDB
 // const connection = "mongodb://localhost:27017/transactionsDB"
@@ -13,8 +15,12 @@ const clients = [];
 
 const models = {
   transactions: Transaction,
-  logs: Log
+  logs: Log,
+  metrics: Metric,
+  events: Event
 }
+
+const modules = ["transactions", "logs", "metrics", "events"]
 
 const server = net.createServer((socket) => {
   console.log('Client connected');
@@ -26,8 +32,8 @@ const server = net.createServer((socket) => {
       console.log("Request:", request)
       const parsedRequest = JSON.parse(request);
       console.log("parsedRequest:", parsedRequest)
-      if (parsedRequest.type === 'transactions' || parsedRequest.type === 'logs') {
-        const data = await models[parsedRequest.type].find(parsedRequest.filter || {}).limit(100);
+      if (modules.includes(parsedRequest.type)) {
+        const data = (await models[parsedRequest.type].find(parsedRequest.filter || {}).limit(100)) || [];
         socket.write(JSON.stringify({ type: parsedRequest.type, data }));
       } else {
         socket.write(JSON.stringify({ error: 'Invalid request type' }));
@@ -54,14 +60,18 @@ const watchCollections = async (model, type) => {
   const changeStream = model.watch();
   changeStream.on('change', (change) => {
     console.log(`Change detected in ${type}:`, change);
+    console.log("isArray: ", Array.isArray(change.fullDocument))
+    console.log("Number of clients: ", clients.length)
     clients.forEach((client) => {
-      client.write(JSON.stringify({ type, data: Array.isArray(change.fullDocument) ? change.fullDocument : [change.fullDocument] }));
+      client.write(JSON.stringify({ type, data: [change.fullDocument] }));
     });
   });
 };
 
 watchCollections(Transaction, 'transactions');
 watchCollections(Log, 'logs');
+watchCollections(Metric, 'metrics');
+watchCollections(Event, 'events');
 
 server.listen(1337, () => {
   console.log('TCP server listening on port 1337');

@@ -1,45 +1,63 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+
+interface Log {
+  _id: string;
+  message: string;
+  level: string; // e.g., 'info', 'warn', 'error'
+  timestamp: string;
+  source: string; // e.g., 'server', 'database', 'client'
+}
 
 const Logs = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [filter, setFilter] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchLogs = () => {
+    setLoading(true);
+    setError(null);
+    fetch(`http://localhost:4000/api/logs?filter=${filter}`)
+      .then((response) => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then((data: Log[]) => {
+        setLogs(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching logs:', error);
+        setError(error.message);
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:4000/api/logs");
-        const result: any[] = await response.json();
-        const newLogs = result.filter(
-          (newItem) =>
-            !data.some(
-              (existingItem) =>
-                JSON.stringify(existingItem) === JSON.stringify(newItem)
-            )
-        );
-        setData((prev) => [...prev, ...newLogs]);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    const interval = setInterval(fetchData, 2000);
-
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
-  }, [data]);
+  }, [filter]);
 
   return (
     <div>
       <h2>Logs</h2>
-      <ul>
-        {data.map((item, index) => {
-          console.log("item", item);
-          return (
-            <li key={index}>
-              {JSON.stringify(item)}{" "}
-            </li>
-          );
-        })}
-      </ul>
+      <input
+        type="text"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        placeholder="Filter logs"
+      />
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {!loading && !error && (
+        <ul>
+          {logs.map((log) => (
+            <li key={log._id}>{JSON.stringify(log)}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

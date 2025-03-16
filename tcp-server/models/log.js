@@ -1,10 +1,14 @@
 const mongoose = require("mongoose");
 
-const logSchema = new mongoose.Schema({
-  message: String,
-  level: String,
-  timestamp: Date,
-});
-const Log = mongoose.model("Log", logSchema);
+const Log = mongoose.model(
+  "Log",
+  new mongoose.Schema({
+    id: String,
+    message: String,
+    level: String, // e.g., 'info', 'warn', 'error'
+    timestamp: String,
+    source: String, // e.g., 'server', 'database', 'client'
+  })
+);
 
 module.exports = Log;
