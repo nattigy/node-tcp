@@ -7,7 +7,8 @@ const Event = require("./models/event");
 
 // Connect to MongoDB
 // const connection = "mongodb://localhost:27017/transactionsDB"
-const connection = "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false"
+// const connection = "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false"
+const connection = "mongodb+srv://nattigy:uWnWPD4PNDSmUJSE@cluster0.ifqtm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
 mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // Store connected clients

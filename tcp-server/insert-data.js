@@ -14,8 +14,10 @@ app.use(cors());
 
 // MongoDB connection
 // const connection = "mongodb://localhost:27017/transactionsDB"
-const connection =
-  "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false";
+// const connection =
+//   "mongodb://localhost:27017,localhost:27018,localhost:27019/transactionsDB?replicaSet=rs&retryWrites=false";
+
+const connection = "mongodb+srv://nattigy:uWnWPD4PNDSmUJSE@cluster0.ifqtm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0" 
 mongoose.connect(connection, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -139,12 +141,12 @@ const insertEvents = async () => {
   }
 };
 
-// (async () => {
-//   await insertTransactions();
-//   await insertLogs();
-//   await insertMetrics();
-//   await insertEvents();
-// })()
+(async () => {
+  await insertTransactions();
+  await insertLogs();
+  await insertMetrics();
+  await insertEvents();
+})()
 
 // API to serve data to React client
 app.get("/api/insertdata/:type", async (req, res) => {
