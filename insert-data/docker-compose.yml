@@ -1,0 +1,7 @@
+services:
+  app:
+    image: insert_data_app
+    build: .
+    # ports:
+    #   - 3000:3000
+    network_mode: "host"
