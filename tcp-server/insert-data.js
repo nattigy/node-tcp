@@ -141,12 +141,12 @@ const insertEvents = async () => {
   }
 };
 
-(async () => {
-  await insertTransactions();
-  await insertLogs();
-  await insertMetrics();
-  await insertEvents();
-})()
+// (async () => {
+//   await insertTransactions();
+//   await insertLogs();
+//   await insertMetrics();
+//   await insertEvents();
+// })()
 
 // API to serve data to React client
 app.get("/api/insertdata/:type", async (req, res) => {
